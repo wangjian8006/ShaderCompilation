@@ -62,7 +62,7 @@
 			fixed3 calculateNormal(v2f i)
 			{
 				i.normalDir = normalize(i.normalDir);
-				fixed3 normalTangent = UnpackNormal(tex2D(_BumpTex,TRANSFORM_TEX(i.uv0, _BumpTex)));
+				fixed3 normalTangent = UnpackNormal(tex2D(_BumpTex,TRANSFORM_TEX(i.uv0, _BumpTex)));		//切线空间法线纹理
 				fixed3 normalWorld = (i.tangentDir * normalTangent.x + i.bitangentDir * normalTangent.y + i.normalDir * normalTangent.z);
 				return normalize(normalWorld);
 			}

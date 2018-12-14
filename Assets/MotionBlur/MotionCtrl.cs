@@ -19,7 +19,7 @@ public class MotionCtrl : MonoBehaviour {
         float duration = Time.time - startTime;
         if (duration > 1.0f)
         {
-            motionBlur.clear = true;
+            if (motionBlur != null) motionBlur.clear = true;
             startTime = Time.time;
             speed = speed * -1;
         }
