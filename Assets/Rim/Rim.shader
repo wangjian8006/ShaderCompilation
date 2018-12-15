@@ -30,8 +30,8 @@
 			struct v2f
 			{
 				float4 pos			: SV_POSITION;
-				float2 uv0			: TEXCOORD0;
-				fixed4 posWorld 	: TEXCOORD1;
+				float2 uv			: TEXCOORD0;
+				fixed2 uvNormal 	: TEXCOORD1;
 				fixed3 normalDir 	: TEXCOORD2;
 				fixed3 tangentDir 	: TEXCOORD3;
 				fixed3 bitangentDir : TEXCOORD4;
@@ -46,35 +46,35 @@
 			{
 				v2f o;
 				o.pos = UnityObjectToClipPos(v.vertex);
-				o.posWorld = mul(unity_ObjectToWorld, v.vertex);
 
 				o.normalDir = UnityObjectToWorldNormal(v.normal);
 				o.tangentDir = normalize( mul( unity_ObjectToWorld, float4( v.tangent.xyz, 0.0 ) ).xyz );
 				o.bitangentDir = normalize(cross(o.normalDir, o.tangentDir) * v.tangent.w);
 
 				//视线角度
-				o.viewDir = normalize(_WorldSpaceCameraPos.xyz - o.posWorld.xyz);
+				o.viewDir = normalize(_WorldSpaceCameraPos.xyz - mul(unity_ObjectToWorld, v.vertex).xyz);
 
-				o.uv0 = TRANSFORM_TEX(v.texcoord0, _MainTex);
+				o.uv = TRANSFORM_TEX(v.texcoord0, _MainTex);
+				o.uvNormal = TRANSFORM_TEX(v.texcoord0, _BumpTex);
 				return o;
 			}
 
 			fixed3 calculateNormal(v2f i)
 			{
 				i.normalDir = normalize(i.normalDir);
-				fixed3 normalTangent = UnpackNormal(tex2D(_BumpTex,TRANSFORM_TEX(i.uv0, _BumpTex)));		//切线空间法线纹理
+				fixed3 normalTangent = UnpackNormal(tex2D(_BumpTex, i.uvNormal));		//切线空间法线纹理
 				fixed3 normalWorld = (i.tangentDir * normalTangent.x + i.bitangentDir * normalTangent.y + i.normalDir * normalTangent.z);
 				return normalize(normalWorld);
 			}
 			
 			fixed4 frag (v2f i) : SV_Target
 			{
-				fixed4 col = tex2D(_MainTex, i.uv0);
+				fixed4 col = tex2D(_MainTex, i.uv);
 
-				//如果视线与法线的角度
+				//视线与法线的角度
 				fixed NdotV = dot(calculateNormal(i), i.viewDir);
 
-				//两者角度越大则值越大，角度越大，则发射越强（菲涅尔）
+				//角度越大值越大，则发射越强（菲涅尔）
 				float fresnel = max(0, _RimColor.a * 2.0 - NdotV);
 
 				col.rgb += _RimColor.rgb * fresnel;
