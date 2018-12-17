@@ -1,4 +1,4 @@
-﻿Shader "Glass_Reflect"
+﻿Shader "WaterShader_CPU"
 {
 	Properties
 	{
@@ -13,16 +13,11 @@
 	}
 	SubShader
 	{
-		Tags {
-			"RenderType" = "Transparent"
-			"Queue" = "Transparent"
-		}
+		Tags { "RenderType"="Opaque" }
+		LOD 100
 
 		Pass
 		{
-			Zwrite Off
-			Blend SrcAlpha OneMinusSrcAlpha
-
 			CGPROGRAM
 			#pragma vertex vert
 			#pragma fragment frag
@@ -57,6 +52,8 @@
 
 			float _Smoothness;
 			fixed3 _LightColor0;
+
+			float2 _Speed;
 			
 			v2f vert (appdata v)
 			{
@@ -75,7 +72,7 @@
 
 				return o;
 			}
-
+			
 			fixed3 calculateNormal(v2f i)
 			{
 				i.normalDir = normalize(i.normalDir);
@@ -86,7 +83,7 @@
 			
 			fixed4 frag (v2f i) : SV_Target
 			{
-				fixed4 col = tex2D(_MainTex, i.uv) * _Color;
+				fixed4 col = tex2D(_MainTex, i.uv + _Speed * _Time.x) * _Color;
 
 				float3 N = calculateNormal(i);
 				float3 V = i.viewDir;
@@ -99,8 +96,7 @@
 				spec *= col.a;
 
 				//reflection
-				//菲涅尔，夹角越小,反射越明显
-				float rim = max(0, _Fresnel - dot(N,V));		//超简版菲尼尔
+				float rim = max(0, _Fresnel - dot(N,V));
 				rim *= col.a;
 				fixed4 refl = texCUBE(_Reflect, -reflect(V, N)) * rim;
 
@@ -109,7 +105,8 @@
 				col.rgb += refl.rgb;
 
 				col.a = max(spec, col.a);
-
+				//col = float4(i.normalDir, 1);
+				//col = float4(N, 1);
 				return col;
 			}
 			ENDCG

@@ -1,4 +1,4 @@
-﻿Shader "Glass_Reflect"
+﻿Shader "Water_SinWaves"
 {
 	Properties
 	{
@@ -13,18 +13,13 @@
 	}
 	SubShader
 	{
-		Tags {
-			"RenderType" = "Transparent"
-			"Queue" = "Transparent"
-		}
+		Tags { "RenderType"="Opaque" }
+		LOD 100
 
 		Pass
 		{
-			Zwrite Off
-			Blend SrcAlpha OneMinusSrcAlpha
-
 			CGPROGRAM
-			#pragma vertex vert
+			#pragma vertex vert_sin
 			#pragma fragment frag
 			
 			#include "UnityCG.cginc"
@@ -57,18 +52,48 @@
 
 			float _Smoothness;
 			fixed3 _LightColor0;
-			
-			v2f vert (appdata v)
+
+			float _WavesLengths[3];		//波长、频率
+			float _Amplitudes[3];		//振幅
+			float _Phases[3];			//相位
+			float _DirectionXs[3];		//方向
+			float _DirectionYs[3];		//方向
+
+			float2 _TextureSpeed;
+			float _SpeedTime;
+
+			v2f vert_sin (appdata v)
 			{
 				v2f o;
-				o.pos = UnityObjectToClipPos(v.vertex);
 
-				o.normalDir = UnityObjectToWorldNormal(v.normal);
-				o.tangentDir = normalize( mul( unity_ObjectToWorld, float4( v.tangent.xyz, 0.0 ) ).xyz );
-				o.bitangentDir = normalize(cross(o.normalDir, o.tangentDir) * v.tangent.w);
+				float4 rawPos = v.vertex;
+				float normalValueX = 0;
+				float normalValueY = 0;
+
+				for (int ii = 0; ii < 3; ++ii)
+				{
+					float value = dot(float2(_DirectionXs[ii], _DirectionYs[ii]), rawPos.xz) * _WavesLengths[ii] + _SpeedTime * _Phases[ii];
+					rawPos.y += _Amplitudes[ii] * sin(value);
+					
+					value = _WavesLengths[ii] * _Amplitudes[ii] * cos(value);
+
+					normalValueX += value * _DirectionXs[ii];
+					normalValueY += value * _DirectionYs[ii];
+				}
+
+                float3 binormal = float3(1, 0, normalValueX);
+                float3 tangent = float3(0, 1, normalValueY);
+                float3 normal = float3(-normalValueX, -normalValueY, 1);
+
+				o.pos = UnityObjectToClipPos(rawPos);
+				o.normalDir = UnityObjectToWorldNormal(normal);
+				o.tangentDir = normalize(mul(unity_ObjectToWorld, float4(tangent.xyz, 0.0)).xyz);
+				o.bitangentDir = normalize(mul(unity_ObjectToWorld, float4(binormal.xyz, 0.0)).xyz);
+
+				//o.bitangentDir = normalize(cross(o.normalDir, o.tangentDir) * v.tangent.w);
 
 				//视线角度
-				o.viewDir = normalize(_WorldSpaceCameraPos.xyz - mul(unity_ObjectToWorld, v.vertex).xyz);
+				o.viewDir = normalize(_WorldSpaceCameraPos.xyz - mul(unity_ObjectToWorld, rawPos).xyz);
 
 				o.uv = TRANSFORM_TEX(v.uv, _MainTex);
 				o.uvNormal = TRANSFORM_TEX(v.uv, _BumpTex);
@@ -86,7 +111,7 @@
 			
 			fixed4 frag (v2f i) : SV_Target
 			{
-				fixed4 col = tex2D(_MainTex, i.uv) * _Color;
+				fixed4 col = tex2D(_MainTex, i.uv + _TextureSpeed * _Time.x) * _Color;
 
 				float3 N = calculateNormal(i);
 				float3 V = i.viewDir;
@@ -99,8 +124,7 @@
 				spec *= col.a;
 
 				//reflection
-				//菲涅尔，夹角越小,反射越明显
-				float rim = max(0, _Fresnel - dot(N,V));		//超简版菲尼尔
+				float rim = max(0, _Fresnel - dot(N,V));
 				rim *= col.a;
 				fixed4 refl = texCUBE(_Reflect, -reflect(V, N)) * rim;
 
@@ -109,7 +133,8 @@
 				col.rgb += refl.rgb;
 
 				col.a = max(spec, col.a);
-
+				//col = float4(i.normalDir, 1);
+				//col = float4(N, 1);
 				return col;
 			}
 			ENDCG
