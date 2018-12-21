@@ -96,9 +96,9 @@
 				fixed4 col = tex2D(_MainTex, i.uv) * _Color;
 
 				float3 N = calculateNormal(i);
-				float3 V = i.viewDir;
+				float3 V = normalize(i.viewDir);
 				float3 L = normalize(_WorldSpaceLightPos0.xyz);
-				float3 H = normalize(L+ V);
+				float3 H = normalize(_WorldSpaceLightPos0.xyz + i.viewDir);
 
 				//specular
 				float spec = max(0, dot(N, H));

@@ -137,37 +137,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6cce9668b1ebd4e49826cd7cf9fee5b9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  WaterWidth: 18
-  WaterHeight: 18
-  useSinWave: 0
-  Waves:
-  - 0.1
-  - 0.5
-  - 2
-  Amplitude:
-  - 0.1
-  - 0.7
-  - 0.2
-  Phase:
-  - 1
-  - 2
-  - 3
-  Direction:
-  - {x: 1, y: 10}
-  - {x: 0.1, y: -20}
-  - {x: -1.1, y: 0.7071068}
-  Sharps:
-  - 0.7
-  - 1.5
-  - 1
-  MainColor: {r: 0, g: 0.66896534, b: 1, a: 1}
-  MainTex: {fileID: 2800000, guid: cc0ea1104da9fa54e85a6c640e59a53c, type: 3}
-  BumpTex: {fileID: 2800000, guid: 87cebafe61fe35645afce5d4bd0c09ef, type: 3}
-  Smoothness: 128
-  Fresnel: 0.42
-  ReflectCube: {fileID: 8900000, guid: ceb2e2d91919b344d9257162c447c3fe, type: 2}
-  SpeedTime: 0
-  TextureSpeed: {x: -0.5, y: 0.5}
+  WaterWidth: 50
+  WaterHeight: 50
+  Waves: {x: 0.5, y: 0.38, z: 0.59, w: 0.6}
+  Amplitude: {x: 1, y: 0.76, z: 0.175, w: 0.225}
+  Phase: {x: 2, y: 2, z: 1, w: 3}
+  Sharps: {x: 2, y: 1, z: 1, w: 2}
+  DirectionX: {x: 0.4691436, y: -0.2, z: 0.7033888, w: 0.7175735}
+  DirectionY: {x: 0.3540513, y: 0.1, z: -0.6799999, w: -0.2}
+  BumpDirection: {x: 40, y: 40, z: 40, w: -40}
+  BumpTiling: {x: 0.12, y: 0.07, z: 0.08, w: 0.06}
+  MainColor: {r: 0.2757353, g: 0.493624, b: 0.5514706, a: 1}
+  BumpTex: {fileID: 2800000, guid: 8b29c1e5eb7b6924496e1ea3d6f26cd7, type: 3}
+  Smoothness: 8
+  Reflection: {fileID: 8900000, guid: ceb2e2d91919b344d9257162c447c3fe, type: 2}
+  Fresnel: 5
 --- !u!4 &1130511033
 Transform:
   m_ObjectHideFlags: 0
@@ -175,8 +159,8 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1130511031}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 5, y: 5, z: 5}
+  m_LocalPosition: {x: -100, y: 0, z: 0}
+  m_LocalScale: {x: 2, y: 2, z: 2}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 3
@@ -335,77 +319,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
---- !u!1 &1569146005
-GameObject:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  serializedVersion: 5
-  m_Component:
-  - component: {fileID: 1569146007}
-  - component: {fileID: 1569146006}
-  m_Layer: 0
-  m_Name: Water_Sin
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1569146006
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1569146005}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6cce9668b1ebd4e49826cd7cf9fee5b9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  WaterWidth: 18
-  WaterHeight: 18
-  useSinWave: 1
-  Waves:
-  - 0.1
-  - 0.5
-  - 2
-  Amplitude:
-  - 0.1
-  - 0.5
-  - 0.2
-  Phase:
-  - 1
-  - 2
-  - 3
-  Direction:
-  - {x: 1.5, y: 0.5}
-  - {x: -1.5, y: 5}
-  - {x: 0.5, y: 0.7071068}
-  Sharps:
-  - 0.7
-  - 1.5
-  - 1
-  MainColor: {r: 0, g: 0.66896534, b: 1, a: 1}
-  MainTex: {fileID: 2800000, guid: cc0ea1104da9fa54e85a6c640e59a53c, type: 3}
-  BumpTex: {fileID: 2800000, guid: 87cebafe61fe35645afce5d4bd0c09ef, type: 3}
-  Smoothness: 128
-  Fresnel: 0.42
-  ReflectCube: {fileID: 8900000, guid: ceb2e2d91919b344d9257162c447c3fe, type: 2}
-  SpeedTime: 0
-  TextureSpeed: {x: -0.5, y: 0.5}
---- !u!4 &1569146007
-Transform:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1569146005}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 100, y: 0, z: 0}
-  m_LocalScale: {x: 5, y: 5, z: 5}
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 4
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1947610386
 GameObject:
   m_ObjectHideFlags: 0

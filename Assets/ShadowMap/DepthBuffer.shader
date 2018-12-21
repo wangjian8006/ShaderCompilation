@@ -13,17 +13,15 @@
 
 			struct appdata
 			{
-				fixed4 vertex : POSITION;
+				float4 vertex : POSITION;
 			};
 
 			struct v2f
 			{
-				fixed4 vertex : SV_POSITION;
-				fixed2 depth : TEXCOORD0;
+				float4 vertex : SV_POSITION;
+				float2 depth : TEXTCOORD0;
 			};
 
-			sampler2D _MainTex;fixed4 _MainTex_ST;
-			
 			v2f vert (appdata v)
 			{
 				v2f o;

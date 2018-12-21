@@ -1,17 +1,13 @@
-﻿Shader "ShadowMap"
+﻿Shader "ShadowMapNormalBias"
 {
 	Properties
 	{
 		_MainTex ("Texture", 2D) = "green" {}
+		_Bias("Bias", Float) = 0.005
 	}
 	SubShader
 	{
-		Tags
-		{
-		 	"RenderType"="Opaque" 
-	 	}
-		LOD 100
-
+		Tags { "RenderType"="Opaque" }
 		Pass
 		{
 			CGPROGRAM
@@ -23,19 +19,20 @@
 			struct appdata
 			{
 				fixed4 vertex : POSITION;
-				fixed2 uv : TEXCOORD0;
+				float2 uv : TEXCOORD0;
 			};
 
 			struct v2f
 			{
 				float4 vertex : SV_POSITION;
 				float2 uv: TEXCOORD0;
-                float4 lightSpacePos : TEXCOORD1;
+                float4 worldPos : TEXCOORD1;
 			};
 			
-			sampler2D _MainTex;fixed4 _MainTex_ST;
-			fixed4x4 _ShadowMapLightProjectView;
+			sampler2D _MainTex;float4 _MainTex_ST;
+			float4x4 _ShadowMapLightProjectView;
 			sampler2D _ShadowMapDepthTex;
+			float _Bias;
 
 			v2f vert (appdata v)
 			{
@@ -44,29 +41,31 @@
 
 				o.vertex = UnityObjectToClipPos(v.vertex);
 
-				fixed4 worldPos = mul(unity_ObjectToWorld, v.vertex);
-				worldPos.w = 1;
-				worldPos = mul(_ShadowMapLightProjectView, worldPos);
-				worldPos.xyz = worldPos.xyz / worldPos.w;
-				o.lightSpacePos = worldPos * 0.5 + 0.5;	//从[-1,1]映射到[0,1]
-
+				o.worldPos = mul(unity_ObjectToWorld, v.vertex);
+				o.worldPos = mul(UNITY_MATRIX_M, v.vertex);
 				return o;
 			}
 
 			fixed4 frag (v2f v) : SV_Target
 			{
+				fixed4 ndcpos = mul(_ShadowMapLightProjectView, v.worldPos);
+				ndcpos.xyz = ndcpos.xyz / ndcpos.w;
+				float3 uvpos = ndcpos * 0.5 + 0.5;
+
                 fixed4 col = tex2D(_MainTex, v.uv);
 
 				//灯光空间位置的最小的深度
-				fixed4 lightPos = v.lightSpacePos;
-				fixed4 depthRGBA = tex2D(_ShadowMapDepthTex, lightPos.xy);
+				fixed4 depthRGBA = tex2D(_ShadowMapDepthTex, uvpos.xy);
 				float d = DecodeFloatRGBA(depthRGBA);
 
 				//灯光空间位置当前渲染的深度
-				fixed depth = lightPos.z;
+				float depth = ndcpos.z;
 
-                float shadowScale = 1;
-                if(depth < d) shadowScale = 0.55;
+                //float shadowScale = 1;
+                //if(depth < d) shadowScale = 0.55;
+
+				float shadowScale = 1 - (depth + _Bias < d ? 1.0 : 0.0);
+
                 return col * shadowScale;
 			}
 			ENDCG

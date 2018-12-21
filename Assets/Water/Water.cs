@@ -10,33 +10,31 @@ public class Water : MonoBehaviour
     [Range(1, 100)]
     public int WaterHeight = 1;
 
-    public bool useSinWave = false;
+    public Vector4 Waves = Vector4.one;     //频率
 
-    public float[] Waves;     //频率
+    public Vector4 Amplitude = Vector4.one;     //振幅
 
-    public float[] Amplitude;     //振幅
+    public Vector4 Phase = Vector4.one;      //相位
 
-    public float[] Phase;      //相位
+    public Vector4 Sharps = Vector4.one;     //锐度
 
-    public Vector2[] Direction;     //方向
+    public Vector4 DirectionX = Vector4.one;     //方向AB
 
-    public float[] Sharps;     //方向
+    public Vector4 DirectionY = Vector4.one;     //方向CD
+
+    public Vector4 BumpDirection = Vector4.one;
+
+    public Vector4 BumpTiling = Vector4.one;
 
     public Color MainColor;
-
-    public Texture2D MainTex;
 
     public Texture2D BumpTex;
 
     public float Smoothness;
 
+    public Cubemap Reflection;
+
     public float Fresnel;
-
-    public Cubemap ReflectCube;
-
-    public float SpeedTime;
-
-    public Vector2 TextureSpeed = Vector2.one;
 
     protected MeshFilter m_meshFilter;
 
@@ -98,42 +96,35 @@ public class Water : MonoBehaviour
         m_meshRender = this.gameObject.GetComponent<MeshRenderer>();
         if (m_meshRender == null) m_meshRender = this.gameObject.AddComponent<MeshRenderer>();
 
-        if (useSinWave == false) WaterMaterial = new Material(Shader.Find("Water_GeometricWaves"));
-        else WaterMaterial = new Material(Shader.Find("Water_SinWaves"));
+        WaterMaterial = new Material(Shader.Find("Water_GeometricWaves"));
 
         m_meshRender.material = WaterMaterial;
         m_meshFilter.sharedMesh = GenarateMesh();
+    }
+
+    Vector4 GetVector4ByVector2(Vector2 v1, Vector2 v2)
+    {
+        return new Vector4(v1.x, v1.y, v2.x, v2.y);
     }
 
     void Update()
     {
         if (WaterMaterial == null) return;
 
-        if (Mathf.Abs(SpeedTime) < 0.0001f) WaterMaterial.SetFloat("_SpeedTime", Time.time);
-        else WaterMaterial.SetFloat("_SpeedTime", SpeedTime);
-
-        WaterMaterial.SetFloatArray("_WavesLengths", Waves);
-        WaterMaterial.SetFloatArray("_Amplitudes", Amplitude);
-        WaterMaterial.SetFloatArray("_Phases", Phase);
+        WaterMaterial.SetVector("_WavesLengths", Waves);
+        WaterMaterial.SetVector("_Amplitudes", Amplitude);
+        WaterMaterial.SetVector("_Phases", Phase);
         WaterMaterial.SetColor("_Color", MainColor);
-        WaterMaterial.SetTexture("_MainTex", MainTex);
         WaterMaterial.SetTexture("_BumpTex", BumpTex);
+        WaterMaterial.SetVector("_Sharps", Sharps);
         WaterMaterial.SetFloat("_Smoothness", Smoothness);
+        WaterMaterial.SetVector("_BumpDirection", BumpDirection);
+        WaterMaterial.SetVector("_BumpTiling", BumpTiling);
+        WaterMaterial.SetTexture("_Reflection", Reflection);
         WaterMaterial.SetFloat("_Fresnel", Fresnel);
-        WaterMaterial.SetTexture("_Reflect", ReflectCube);
-        WaterMaterial.SetFloatArray("_Sharps", Sharps);
-        WaterMaterial.SetVector("_TextureSpeed", TextureSpeed);
+        
 
-        List<float> _DirectionXs = new List<float>();
-        List<float> _DirectionYs = new List<float>();
-        for (int i = 0; i < Direction.Length; ++i)
-        {
-            Vector2 tmp = Direction[i].normalized;
-            _DirectionXs.Add(tmp.x);
-            _DirectionYs.Add(tmp.y);
-        }
-
-        WaterMaterial.SetFloatArray("_DirectionXs", _DirectionXs);
-        WaterMaterial.SetFloatArray("_DirectionYs", _DirectionYs);
+        WaterMaterial.SetVector("_DirectionX", DirectionX);
+        WaterMaterial.SetVector("_DirectionY", DirectionY);
     }
 }

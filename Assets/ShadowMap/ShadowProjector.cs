@@ -1,32 +1,41 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
- 
-public class ShadowMap : MonoBehaviour
+
+public class ShadowProjector : MonoBehaviour
 {
+    public Projector shadowProjector;
+
     public Camera lightCamera;
 
     public RenderTexture depthTexture;
 
     public Shader depthShader;
 
-	void Start ()
+    void Start()
     {
+        shadowProjector = this.gameObject.GetComponent<Projector>();
         lightCamera = this.gameObject.AddComponent<Camera>();
-        lightCamera.orthographic = true;
-        lightCamera.orthographicSize = 5;
+
+        shadowProjector.orthographic = lightCamera.orthographic = true;
+        shadowProjector.orthographicSize = lightCamera.orthographicSize = 5;
+        shadowProjector.farClipPlane = lightCamera.farClipPlane;
+        shadowProjector.nearClipPlane = lightCamera.nearClipPlane;
+        shadowProjector.fieldOfView = lightCamera.fieldOfView;
+
+        lightCamera.cullingMask = shadowProjector.ignoreLayers;
+
         lightCamera.clearFlags = CameraClearFlags.SolidColor;
-        lightCamera.aspect = Camera.main.aspect;
         lightCamera.backgroundColor = new Color(0, 0, 0, 1);
 
         lightCamera.transform.SetPositionAndRotation(transform.position, transform.rotation);
-        
+
         lightCamera.targetTexture = depthTexture;
         depthShader = Shader.Find("DepthBuffer");
         lightCamera.SetReplacementShader(depthShader, "RenderType");
-	}
-	
-	void Update ()
+    }
+
+    void Update()
     {
         if (depthTexture == null)
         {
@@ -35,13 +44,6 @@ public class ShadowMap : MonoBehaviour
         }
 
         lightCamera.targetTexture = depthTexture;
-
-        Matrix4x4 mt = GL.GetGPUProjectionMatrix(lightCamera.projectionMatrix, false) * lightCamera.worldToCameraMatrix;
-        Shader.SetGlobalMatrix("_ShadowMapLightProjectView", mt);
-        Shader.SetGlobalTexture("_ShadowMapDepthTex", depthTexture);
-        Shader.SetGlobalFloat("_ShadowMapDepthTexWidth", depthTexture.width);
-        Shader.SetGlobalFloat("_ShadowMapDepthTexHeight", depthTexture.height);
-
-        //lightCamera.RenderWithShader(depthShader, "RenderType");
-	}
+        shadowProjector.material.SetTexture("_ShadowMapDepthTex", depthTexture);
+    }
 }
